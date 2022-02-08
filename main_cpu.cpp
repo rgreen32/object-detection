@@ -17,26 +17,6 @@ const auto NUM_COLORS = sizeof(colors) / sizeof(colors[0]);
 
 bool myfunction(std::tuple<cv::Rect, float> i, std::tuple<cv::Rect, float> j) { return (std::get<1>(i) > std::get<1>(j)); }
 
-int FindHighestScoringDetectionBox(std::vector<cv::Rect> class_detection_boxes, std::vector<float> class_detection_scores)
-{
-    float highest_confidence_score = -INFINITY;
-    int most_confident_box_index;
-
-    //find highest scoring box
-    int tes1 = class_detection_boxes.size();
-    for (int class_detection_boxes_index = 0; class_detection_boxes_index < class_detection_boxes.size(); class_detection_boxes_index++)
-    {
-        cv::Rect detection_box = class_detection_boxes[class_detection_boxes_index];
-        float detection_box_confidence_score = class_detection_scores[class_detection_boxes_index];
-        if (detection_box_confidence_score > highest_confidence_score)
-        {
-            highest_confidence_score = detection_box_confidence_score;
-            most_confident_box_index = class_detection_boxes_index;
-        }
-    }
-    return most_confident_box_index;
-}
-
 void NonMaxSupression(std::vector<std::tuple<cv::Rect, float>> (&all_detection_boxes)[NUM_CLASSES], float IOUThreshold)
 {
 
@@ -53,8 +33,6 @@ void NonMaxSupression(std::vector<std::tuple<cv::Rect, float>> (&all_detection_b
             continue;
         }
 
-
-
         int class_detection_boxes_index = 0;
         while (class_detection_boxes_index < class_detection_boxes.size())
         {
@@ -69,8 +47,6 @@ void NonMaxSupression(std::vector<std::tuple<cv::Rect, float>> (&all_detection_b
                 if ((detection_box.x < most_confident_box.x) && (detection_box.x + detection_box.width < most_confident_box.x + most_confident_box.width) || (detection_box.x > most_confident_box.x + most_confident_box.width))
                 {
                     filter_index++;
-                    // most_confident_box = std::get<0>(class_detection_boxes[class_detection_boxes_index]);
-                    // most_confident_box_score = std::get<1>(class_detection_boxes[class_detection_boxes_index]);
                     continue;
                 }
                 else if ((detection_box.y < most_confident_box.y) && (detection_box.y + detection_box.height < most_confident_box.y + most_confident_box.height) || (detection_box.y > most_confident_box.y + most_confident_box.height))
@@ -94,7 +70,6 @@ void NonMaxSupression(std::vector<std::tuple<cv::Rect, float>> (&all_detection_b
                 float overlap_percentage = overlap_area / detection_box.area();
                 if (overlap_percentage > IOUThreshold)
                 {
-                    // filtered_class_detection_boxes.push_back(detection_box);
                     class_detection_boxes.erase(class_detection_boxes.begin() + filter_index);
                 }
                 else
@@ -122,13 +97,11 @@ int main(int argc, char **argv)
     neural_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
     auto output_names = neural_net.getUnconnectedOutLayersNames();
     cv::Mat frame;
-
     cv::Mat blob;
     std::vector<cv::Mat> neural_net_output;
 
     std::vector<int> class_indices[NUM_CLASSES];
-    // std::vector<cv::Rect> detection_boxes[NUM_CLASSES];
-    // std::vector<float> detection_scores[NUM_CLASSES];
+
     std::vector<std::tuple<cv::Rect, float>> all_detections[NUM_CLASSES];
 
     for (;;)
