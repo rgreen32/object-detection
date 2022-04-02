@@ -20,14 +20,12 @@ bool myfunction(std::tuple<cv::Rect, float> i, std::tuple<cv::Rect, float> j) { 
 void NonMaxSupression(std::vector<std::tuple<cv::Rect, float>> (&all_detection_boxes)[NUM_CLASSES], float IOUThreshold)
 {
 
-    std::vector<cv::Rect> filtered_detection_boxes[NUM_CLASSES];
-    std::vector<float> filtered_detection_scores[NUM_CLASSES];
-
     for (int all_detection_boxes_index = 0; all_detection_boxes_index < NUM_CLASSES; all_detection_boxes_index++)
     {
 
         std::vector<std::tuple<cv::Rect, float>> &class_detection_boxes = all_detection_boxes[all_detection_boxes_index];
         std::sort(class_detection_boxes.begin(), class_detection_boxes.end(), myfunction);
+        
         if (class_detection_boxes.size() == 0)
         {
             continue;
@@ -84,8 +82,11 @@ void NonMaxSupression(std::vector<std::tuple<cv::Rect, float>> (&all_detection_b
 
 int main(int argc, char **argv)
 {
+    std::cout << cv::getBuildInformation() << std::endl;
+    setenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;udp", 1);
+    const std::string RTSP_URL = "udp://192.168.1.182:4003?overrun_nonfatal=1&fifo_size=278876";
 
-    cv::VideoCapture cap("people_walking.mp4");
+    cv::VideoCapture cap(RTSP_URL, cv::CAP_FFMPEG);
     if (!cap.isOpened())
     {
         std::cout << "Cannot open video file. \n";
